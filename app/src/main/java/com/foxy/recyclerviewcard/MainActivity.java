@@ -64,7 +64,6 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
     }
 
     private void initRecyclerView() {
-        Context context;
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         foxyRecyclerView.setLayoutManager(layoutManager);
         foxyRecyclerView.setHasFixedSize(true);
