@@ -1,26 +1,39 @@
 package com.foxy.recyclerviewcard;
 
-import android.content.Context;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.os.Handler;
+import android.widget.Toast;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.androidnetworking.AndroidNetworking;
+import com.androidnetworking.common.Priority;
+import com.androidnetworking.error.ANError;
+import com.androidnetworking.interfaces.ParsedRequestListener;
 import com.foxy.recyclerviewcard.adapters.ImageCardAdapter;
 import com.foxy.recyclerviewcard.bases.BaseActivity;
 import com.foxy.recyclerviewcard.customs.FoxyRecyclerView;
 import com.foxy.recyclerviewcard.customs.FoxyScaleHelper;
 import com.foxy.recyclerviewcard.customs.FoxySwipeRefreshLayout;
-
+import com.foxy.recyclerviewcard.models.FavoritePhoto;
+import com.foxy.recyclerviewcard.models.Photo;
 import java.util.ArrayList;
 import java.util.List;
+import static com.foxy.recyclerviewcard.utils.Constants.API_KEY;
+import static com.foxy.recyclerviewcard.utils.Constants.FLICKR_DOMAIN;
+import static com.foxy.recyclerviewcard.utils.Constants.FORMAT;
+import static com.foxy.recyclerviewcard.utils.Constants.METHOD;
+import static com.foxy.recyclerviewcard.utils.Constants.OPTION;
+import static com.foxy.recyclerviewcard.utils.Constants.USER_ID;
 
 public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnRefreshListener {
 
+    private ProgressDialog progressDialog;
     private FoxySwipeRefreshLayout foxySwipeRefreshLayout;
     private FoxyRecyclerView foxyRecyclerView;
-    private List<Integer> mList;
+    private List<Photo> mList;
     private FoxyScaleHelper foxyScaleHelper;
     private ImageCardAdapter adapter;
 
@@ -36,7 +49,18 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
 
         initData();
 
-        initRecyclerView();
+//        initRecyclerView();
+    }
+
+    private void initProgressDialog(){
+        progressDialog = new ProgressDialog(MainActivity.this);
+        progressDialog.setTitle("Waiting");
+        progressDialog.setMessage("Loading image from network ...");
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setCancelable(false);
+        //progressDialog.setMax(100);
+        //progressDialog.setProgress(0);
+        progressDialog.show();
     }
 
     private void initViews() {
@@ -53,14 +77,39 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
     }
 
     private void initData() {
-        for(int i = 0; i < 6; i++) {
-            mList.add(R.drawable.img01);
-            mList.add(R.drawable.img02);
-            mList.add(R.drawable.img03);
-            mList.add(R.drawable.img01);
-            mList.add(R.drawable.img02);
-            mList.add(R.drawable.img03);
-        }
+        initProgressDialog();
+        AndroidNetworking.post(FLICKR_DOMAIN)
+                .addBodyParameter("method", METHOD)
+                .addBodyParameter("api_key", API_KEY)
+                .addBodyParameter("user_id",USER_ID)
+                .addBodyParameter("format", FORMAT)
+                .addBodyParameter("extras", OPTION)
+                .addBodyParameter("nojsoncallback", "1")
+                .addBodyParameter("per_page", "10")
+                .addBodyParameter("page", "1")
+                .setTag("test")
+                .setPriority(Priority.MEDIUM)
+                .build()
+                .getAsObject(FavoritePhoto.class, new ParsedRequestListener<Object>() {
+
+                    @Override
+                    public void onResponse(Object response) {
+                        //swipeRefreshLayout.setRefreshing(false);
+                        FavoritePhoto favouritePhoto = (FavoritePhoto) response;
+                        mList = favouritePhoto.getPhotos().getPhoto();
+                        initRecyclerView();
+//                        MainActivity.this.mImageUrls.addAll(photos);
+//                        staggeredRecyclerViewAdapter.notifyDataSetChanged();
+                        progressDialog.dismiss();
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                        // handle error
+                        Toast.makeText(MainActivity.this, anError.toString(), Toast.LENGTH_SHORT).show();
+                        progressDialog.dismiss();
+                    }
+                });
     }
 
     private void initRecyclerView() {
@@ -80,15 +129,15 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
             @Override
             public void run() {
                 foxySwipeRefreshLayout.setRefreshing(false);
-                mList.clear();
-                for(int i = 0; i < 3; i++) {
-                    mList.add(R.drawable.img05);
-                    mList.add(R.drawable.img06);
-                    mList.add(R.drawable.img07);
-                }
-                foxyScaleHelper.setCurrentItem(foxyScaleHelper.getCurrentItem(), true);
-                adapter.setList(mList);
-                adapter.notifyDataSetChanged();
+//                mList.clear();
+//                for(int i = 0; i < 3; i++) {
+//                    mList.add(R.drawable.img05);
+//                    mList.add(R.drawable.img06);
+//                    mList.add(R.drawable.img07);
+//                }
+//                foxyScaleHelper.setCurrentItem(foxyScaleHelper.getCurrentItem(), true);
+//                adapter.setList(mList);
+//                adapter.notifyDataSetChanged();
             }
         }, 1500);
     }

@@ -15,9 +15,15 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField "String", "API_KEY", API_KEY
+            buildConfigField "String", "USER_ID", USER_ID
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "API_KEY", API_KEY
+            buildConfigField "String", "USER_ID", USER_ID
         }
     }
 
@@ -39,5 +45,10 @@ dependencies {
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
 
     implementation "androidx.cardview:cardview:1.0.0"
+
+    implementation 'com.amitshekhar.android:android-networking:1.0.2'
+
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
 
 }

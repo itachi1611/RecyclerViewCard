@@ -7,9 +7,11 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.foxy.recyclerviewcard.R;
 import com.foxy.recyclerviewcard.customs.FoxyAdapterHelper;
 import com.foxy.recyclerviewcard.holders.ImageCardViewHolder;
+import com.foxy.recyclerviewcard.models.Photo;
 import com.foxy.recyclerviewcard.utils.ToastUtil;
 
 import java.util.ArrayList;
@@ -17,18 +19,18 @@ import java.util.List;
 
 public class ImageCardAdapter extends RecyclerView.Adapter<ImageCardViewHolder> {
 
-    private List<Integer> mList = new ArrayList<>();
+    private List<Photo> mList = new ArrayList<>();
     private FoxyAdapterHelper mFoxyAdapterHelper = new FoxyAdapterHelper();
 
-    public ImageCardAdapter(List<Integer> mList) {
+    public ImageCardAdapter(List<Photo> mList) {
         this.mList = mList;
     }
 
-    public List<Integer> getList() {
+    public List<Photo> getList() {
         return mList;
     }
 
-    public void setList(List<Integer> list) {
+    public void setList(List<Photo> list) {
         mList = list;
     }
 
@@ -43,7 +45,10 @@ public class ImageCardAdapter extends RecyclerView.Adapter<ImageCardViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull final ImageCardViewHolder holder, final int position) {
         mFoxyAdapterHelper.onBindViewHolder(holder.itemView, position, getItemCount());
-        holder.imageView.setImageResource(mList.get(position % mList.size()));
+        Glide.with(holder.imageView)
+                .load(mList.get(position).getUrlM())
+                .into(holder.imageView);
+
         holder.imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -55,7 +60,7 @@ public class ImageCardAdapter extends RecyclerView.Adapter<ImageCardViewHolder> 
 
     @Override
     public int getItemCount() {
-        return Integer.MAX_VALUE;
+        return (mList != null) ? mList.size() : 0;
     }
 
 }
